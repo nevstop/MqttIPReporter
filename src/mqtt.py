@@ -5,12 +5,7 @@ import threading
 import paho.mqtt.client as mqtt
 import random
 import IP_Functions
-
-# mqtt 中间件信息
-mqtt_broker_ip = "mqtt.iecube.com.cn"
-mqtt_broker_port = 1883
-mqtt_broker_username = ""
-mqtt_broker_passwd = ""
+import config
 
 # ------------------------------------------------------------------------
 # mqtt callback functions
@@ -28,13 +23,19 @@ def on_message(client, userdata, msg):
 
 def Mqtt_Working_Thread():
 
+    ini = config.loadMqttConfiguration('config/MqttIPReporter.ini')
+    mqtt_broker_ip = ini['ip']
+    mqtt_broker_port = ini['port']
+    mqtt_broker_username = ini['username']
+    mqtt_broker_passwd = ini['passwd']
+
     while(True):
         ClientID = "MqttIPReporter/" + str(random.random()*10000)
         client = mqtt.Client(ClientID)
         client.on_connect = on_connect
         client.on_message = on_message
         client.username_pw_set(mqtt_broker_username,mqtt_broker_passwd)
-        client.connect(mqtt_broker_ip, mqtt_broker_port, 60)
+        client.connect(mqtt_broker_ip, int(mqtt_broker_port), 60)
 
         # 启动 mqtt client
         client.loop_start()
