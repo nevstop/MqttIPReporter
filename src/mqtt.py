@@ -3,7 +3,6 @@
 from time import sleep
 import threading
 import paho.mqtt.client as mqtt
-import numpy as np
 import random
 import IP_Functions
 
