@@ -1,5 +1,7 @@
 # your-first-dockerfile
 
+![Docker Image CI](https://github.com/supernevstop/MqttIPReporter/workflows/Docker%20Image%20CI/badge.svg)
+
 ## BUILD DOCKER IMAGE
 
 ```
