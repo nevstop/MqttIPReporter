@@ -2,15 +2,6 @@
 #| Docker 使用#开头作为注释，除非命令行是一个合法的解析器指令(parser directive)
 #| 多行连续字符在注释里是不被支持
 
-#--ARG 指令--
-#| ARG 用于指定传递给构建运行时的变量。格式：
-#| ``````````````````````````````````````````````````````````
-#| ARG <name>[=<default value>]
-#| ``````````````````````````````````````````````````````````
-#| 说明：
-#| - 通过 docker run 中的 --build-arg <key>=<value> 来动态赋值，不指定将使用其默认值。
-ARG ubuntu_version=14.04
-
 #--FROM 指令--
 #| FROM是指定基础镜像，必须为第一个命令，格式：
 #| ``````````````````````````````````````````````````````````
@@ -22,7 +13,8 @@ ARG ubuntu_version=14.04
 #| - ARG 是唯一一个可以在FROM之前运行的Dockerfile指令。
 #| - 在使用FROM指令是可以选择性地用AS name给新构建命名。这个名字可以附加在FROM和 COPY --from=<name|index>的指令后面来引用这个阶段的镜像。
 #| - tag 和 digest 的值是可选的。如果省略，构建器会默认假设一个 latest tag.
-FROM ubuntu:${ubuntu_version} AS build
+FROM python:2.7
+
 
 #--LABEL 指令--
 #| 用于为镜像添加元数据,多用于声明构建信息，作者、机构、组织等。格式：
@@ -33,10 +25,9 @@ FROM ubuntu:${ubuntu_version} AS build
 #| - 为了在LABEL的值里面可以包含空格，你可以在命令行解析中使用引号和反斜杠。
 #| - Labels 包含在基镜像或者父母镜像（在FROM行的镜像）继承到你的镜像。如果label本身已经存在但是值不一样，最后的赋值将会覆盖前面的复制。
 #| - 查看镜像的labels，可以使用docker inspect命令
-LABEL AUTHOR=yao Orgnization=NEVSTOP
-LABEL version="1.0"
-LABEL description="This text illustrates \
-that label-values can span multiple lines."
+LABEL AUTHOR=YAO Orgnization=NEVSTOP
+LABEL version="0.0.1"
+LABEL description="Report IP to MQTT Server"
 
 #--ENV 指令--
 #| ENV 用来设置环境变量。Docker Run -e 参数设置的值为ENV 指令定义KEY。格式：
@@ -48,42 +39,7 @@ that label-values can span multiple lines."
 #| - ENV设置值会在环境中给后续的所有构建阶段的指令使用和也可以被后面内联替换。
 #| - 通过 ${key} 在其它指令中来引用变量，如 ${version}。
 #| - 也可以通过 docker run 中的 -e <ENV> 来动态赋值。
-ENV abc=hello
-ENV abc=bye def=$abc
-
-#--WORKDIR 指令--
-#| WORKDIR 用来指定工作目录。格式：
-#| ``````````````````````````````````````````````````````````
-#| WORKDIR <PATH>
-#| ``````````````````````````````````````````````````````````
-#| 说明：
-#| - 使用 docker run 运行容器时，可以通过 -w 参数覆盖构建时所设置的工作目录。
-WORKDIR /home
-
-#--VOLUME 指令--
-#| VOLUME 用于指定持久化目录, 该目录可以绕过联合文件系统。格式：
-#| ``````````````````````````````````````````````````````````
-#| VOLUME ["<src>",...]
-#| ``````````````````````````````````````````````````````````
-#| 说明：
-#| - 卷可以容器间共享和重用
-#| - 容器并不需要要和其它容器共享卷
-#| - 修改卷后会立即生效
-#| - 对卷的修改不会对镜像产生影响
-#| - 卷会一直存在，直到没有任何容器在使用它
-#| - VOLUME 并不会挂载的宿主机，需要通过 docker run 运行容器时通过 -v 来映射到宿主机的目录中。
-VOLUME ["/data"]
-
-#--ADD 指令/COPY 指令--
-#| ADD 用于将本地文件添加到镜像中，tar 类型文件会自动解压（网络压缩资源不会被解压），可以访问网络资源，类似 wget。COPY 的功能类似于 ADD，但是不会自动解压文件，也不能访问网络资源。有两种形式：
-#| ``````````````````````````````````````````````````````````
-#|    1) ADD/COPY [--chown=<user>:<group>] <src>... <dest>
-#|    2) ADD/COPY [--chown=<user>:<group>] ["<src>",... "<dest>"]（地址包含空格）
-#| ``````````````````````````````````````````````````````````
-#| 注意：
-#| - --chown 特性只有在Dockerfile被用来构建Linux的容器时被支持，Windows容器不支持。
-#| - user 和 group 这个特性只能在基于Linux的操作系统容量上使用。
-ADD http://mirrors.163.com/.help/sources.list.trusty /etc/apt/sources.list
+# ENV abc=hello
 
 #--RUN 指令--
 #| RUN 用来执行构建镜像时执行的命令。RUN 有2种形式：
@@ -95,8 +51,28 @@ ADD http://mirrors.163.com/.help/sources.list.trusty /etc/apt/sources.list
 #| - 默认是使用 /bin/sh -c 在Linux 或 cmd /s /c 在 Windows
 #| - RUN 指令会在当前镜像之上的新层执行一些命令和提交结果。生成提交的镜像将会被用于Dockerfile的下一步.
 #| - RUN 指令创建的中间镜像会被缓存，并会在下次构建中使用。如果不想使用缓存镜像，可在构建时指定 --no-cache 参数
-RUN apt-get -y update && \ 
-    apt-get -y install vim 
+RUN pip install paho-mqtt -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+#--WORKDIR 指令--
+#| WORKDIR 用来指定工作目录。格式：
+#| ``````````````````````````````````````````````````````````
+#| WORKDIR <PATH>
+#| ``````````````````````````````````````````````````````````
+#| 说明：
+#| - 使用 docker run 运行容器时，可以通过 -w 参数覆盖构建时所设置的工作目录。
+WORKDIR /MqttIPReporter/
+
+#--ADD 指令/COPY 指令--
+#| ADD 用于将本地文件添加到镜像中，tar 类型文件会自动解压（网络压缩资源不会被解压），可以访问网络资源，类似 wget。COPY 的功能类似于 ADD，但是不会自动解压文件，也不能访问网络资源。有两种形式：
+#| ``````````````````````````````````````````````````````````
+#|    1) ADD/COPY [--chown=<user>:<group>] <src>... <dest>
+#|    2) ADD/COPY [--chown=<user>:<group>] ["<src>",... "<dest>"]（地址包含空格）
+#| ``````````````````````````````````````````````````````````
+#| 注意：
+#| - --chown 特性只有在Dockerfile被用来构建Linux的容器时被支持，Windows容器不支持。
+#| - user 和 group 这个特性只能在基于Linux的操作系统容量上使用。
+COPY ./src/ /MqttIPReporter/
+RUN ls -la /MqttIPReporter/*
 
 #--EXPOSE 指令--
 #| EXPOSE 指定与外界交互的端口。格式：
@@ -108,9 +84,8 @@ RUN apt-get -y update && \
 #| - EXPOSE 指令实际上不会发布端口。它起着构建镜像和运行镜像的人之间的文档功能，告诉他们哪个端口将被发布。
 #| - 实际发布端口在运行容器的时候，在运行docker run时使用-p标签来发布和一个或多个端口
 #| - 或通过 -P 参数来发布EXPOSE 导出的所有端口。
-EXPOSE 22
-EXPOSE 80/tcp
-EXPOSE 80/udp
+# EXPOSE 6655/tcp
+# EXPOSE 6655/udp
 
 #--ENTRYPOINT 指令--
 #| ENTRYPOINT 用来配置容器，使其可执行化。配合 CMD可省去 application，只使用参数。格式：
@@ -118,8 +93,8 @@ EXPOSE 80/udp
 #|    1) ENTRYPOINT ["executable", "param1", "param2"]  (可执行文件, 优先)
 #|    2) ENTRYPOINT command param1 param2 (shell 形式，shell内部命令)
 #| ``````````````````````````````````````````````````````````
-ENTRYPOINT ["top", "-b"]
- 
+#ENTRYPOINT ["top", "-b"]
+
 
 #--CMD 指令--
 #| CMD 构建容器后执行的命令，也就是在容器启动时才执行的命令。CMD 指令有三种形式：
@@ -134,8 +109,4 @@ ENTRYPOINT ["top", "-b"]
 #|   - CMD用于指定在容器启动时所要执行的命令
 #|   - RUN用于指定镜像构建时所要执行的命令
 
-#If Defined ENTRYPOINT
-CMD ["-c"] 
-#else
-#| CMD ["top", "-b", "-c"]
-#endif
+CMD python /MqttIPReporter/mqtt.py
