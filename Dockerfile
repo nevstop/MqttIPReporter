@@ -13,7 +13,7 @@
 #| - ARG 是唯一一个可以在FROM之前运行的Dockerfile指令。
 #| - 在使用FROM指令是可以选择性地用AS name给新构建命名。这个名字可以附加在FROM和 COPY --from=<name|index>的指令后面来引用这个阶段的镜像。
 #| - tag 和 digest 的值是可选的。如果省略，构建器会默认假设一个 latest tag.
-FROM python:2.7
+FROM python:2.7-slim
 
 
 #--LABEL 指令--
@@ -51,7 +51,7 @@ LABEL description="Report IP to MQTT Server"
 #| - 默认是使用 /bin/sh -c 在Linux 或 cmd /s /c 在 Windows
 #| - RUN 指令会在当前镜像之上的新层执行一些命令和提交结果。生成提交的镜像将会被用于Dockerfile的下一步.
 #| - RUN 指令创建的中间镜像会被缓存，并会在下次构建中使用。如果不想使用缓存镜像，可在构建时指定 --no-cache 参数
-RUN pip install paho-mqtt -i https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip install paho-mqtt configparser -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 #--WORKDIR 指令--
 #| WORKDIR 用来指定工作目录。格式：
