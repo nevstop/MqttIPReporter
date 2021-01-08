@@ -25,9 +25,9 @@ FROM python:2.7-slim
 #| - 为了在LABEL的值里面可以包含空格，你可以在命令行解析中使用引号和反斜杠。
 #| - Labels 包含在基镜像或者父母镜像（在FROM行的镜像）继承到你的镜像。如果label本身已经存在但是值不一样，最后的赋值将会覆盖前面的复制。
 #| - 查看镜像的labels，可以使用docker inspect命令
-LABEL AUTHOR=YAO Orgnization=NEVSTOP
-LABEL version="0.0.1"
-LABEL description="Report IP to MQTT Server"
+LABEL AUTHOR=YAO Orgnization=NEVSTOP            \
+      version="0.0.1"                           \
+      description="Report IP to MQTT Server"
 
 #--ENV 指令--
 #| ENV 用来设置环境变量。Docker Run -e 参数设置的值为ENV 指令定义KEY。格式：
