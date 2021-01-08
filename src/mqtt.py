@@ -23,19 +23,17 @@ def on_message(client, userdata, msg):
 
 def Mqtt_Working_Thread():
 
-    ini = config.loadMqttConfiguration('config/MqttIPReporter.ini')
-    mqtt_broker_ip = ini['ip']
-    mqtt_broker_port = ini['port']
-    mqtt_broker_username = ini['username']
-    mqtt_broker_passwd = ini['passwd']
+    MqttServerConf = config.loadMqttConfiguration('config/MqttIPReporter.ini')
+    RateConf = config.loadRateConfiguration('config/MqttIPReporter.ini')
+    TopicConf = config.loadTopicConfiguration('config/MqttIPReporter.ini')
 
     while(True):
-        ClientID = "MqttIPReporter/" + str(random.random()*10000)
+        ClientID = TopicConf['root'] + "/" + str(random.random()*10000)
         client = mqtt.Client(ClientID)
         client.on_connect = on_connect
         client.on_message = on_message
-        client.username_pw_set(mqtt_broker_username,mqtt_broker_passwd)
-        client.connect(mqtt_broker_ip, int(mqtt_broker_port), 60)
+        client.username_pw_set(MqttServerConf['username'],MqttServerConf['passwd'])
+        client.connect(MqttServerConf['ip'], int(MqttServerConf['port']), 60)
 
         # 启动 mqtt client
         client.loop_start()
@@ -46,10 +44,10 @@ def Mqtt_Working_Thread():
             try:
                 hostname = IP_Functions.get_host_name()
                 IP = IP_Functions.get_host_ip()
-                client.publish("MqttIPReporter/" + hostname + "/IP", IP)
+                client.publish(TopicConf['root'] + "/" + hostname + "/IP", IP)
                 print(hostname + " : " + IP)
-                # Report IP every 5 seconds
-                sleep(5)
+                # Report IP every `RateConf['publish']` seconds
+                sleep(float(RateConf['publish']))
                 pass
             except expression as identifier:
                 threadRunning = False
@@ -60,8 +58,8 @@ def Mqtt_Working_Thread():
         # 停止 mqtt client
         client.loop_stop()
 
-        # Reconnect Timeout = 5s
-        sleep(5)
+        # Reconnect Timeout = `RateConf['reconnect']`
+        sleep(float(RateConf['reconnect']))
 
 
 if __name__ == '__main__':
