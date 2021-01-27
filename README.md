@@ -8,6 +8,8 @@
 ```
 docker build . -t mqtt_ip_reporter:latest
 docker run -d --restart always --network host --name mqtt_ip_reporter mqtt_ip_reporter:latest
+On R2S:
+docker run -d --restart always --network host --name mqtt_ip_reporter mqtt_ip_reporter:r2s
 ```
 
 OR you can use the dockerhub image directly.
